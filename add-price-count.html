@@ -274,7 +274,11 @@
                 buildedInside () {
                     return ((this.dataForm.buildTotal - this.buildPeopleTotal) >= 0) 
                     ? (this.dataForm.peopleNumber * 80)
-                    : 0
+                    : (
+                        (this.dataForm.buildTotal - this.placement) >= 0
+                        ? (this.dataForm.buildTotal - this.placement)
+                        : 0
+                    )
                 },
                 unbuilded () {
                     return ((this.dataForm.buildTotal - this.buildPeopleTotal) < 0) 
@@ -382,7 +386,7 @@
                 },
                 serialNumber () {
                     
-                    return this.dataForm.serial ? 6000 : 0
+                    return Number(this.dataForm.serial) ? 6000 : 0
                 },
                 thirdToal () {
                     return (
