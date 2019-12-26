@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>补偿款计算</title>
+    <title>补偿款计算-包干</title>
     <style>
         body {
             margin: 0;
@@ -258,80 +258,66 @@
             },
             computed: {
                 buildPeopleTotal () {
-                    return this.dataForm.peopleNumber * 130
+                    return 0
                 },
                 placement () {
-                    return this.dataForm.peopleNumber * 50
+                    return 0
                 },
                 buyArea () {
-                    return this.dataForm.peopleNumber * 30
+                    return 0
                 },
                 buildedPeople50 () {
-                    return (this.dataForm.buildTotal - this.dataForm.peopleNumber * 50) >= 0
-                    ? this.placement
-                    : this.placement - this.dataForm.buildTotal
+                    return 0
                 },
                 buildedInside () {
-                    return ((this.dataForm.buildTotal - this.buildPeopleTotal) >= 0) 
-                    ? (this.dataForm.peopleNumber * 80)
-                    : (
-                        (this.dataForm.buildTotal - this.placement) >= 0
-                        ? (this.dataForm.buildTotal - this.placement)
-                        : 0
-                    )
+                    return 0
                 },
                 unbuilded () {
-                    return ((this.dataForm.buildTotal - this.buildPeopleTotal) < 0) 
-                    ? (this.buildPeopleTotal - this.dataForm.buildTotal)
-                    : 0
+                    return 0
                 },
                 buildedOuter () {
-                    return ((this.dataForm.buildTotal - this.buildPeopleTotal) >= 0) 
-                    ? (this.dataForm.buildTotal - this.buildPeopleTotal)
-                    : 0
+                    return 0
                 },
 
                 peopleAverageUnbuild () {
-                    return (this.dataForm.buildTotal - this.placement) >= 0
-                    ? 0
-                    : (this.placement - this.dataForm.buildTotal) * 950
+                    return 0
                 },
                 buy30 () {
-                    return this.buyArea * 8800
+                    return 0
                 },
                 firstTotal () {
-                    return this.peopleAverageUnbuild + this.buy30
+                    return 0
                 },
 
                 builded50Adorn () {
-                    return this.buildedPeople50 * 280
+                    return 0
                 },
                 buildedInsidePrice () {
-                    return this.buildedInside * 560
+                    return 0
                 },
                 unbuildedPrice () {
-                    return this.unbuilded * 340
+                    return 0
                 },
                 ontimeRemoval () {
-                    return this.placement * 250
+                    return 0
                 },
                 placementPrice () {
-                    return this.placement * 1500
+                    return 0
                 },
                 buildedInsidePrice2 () {
-                    return this.buildedInside * 1600
+                    return 0
                 },
                 buildedOuterPrice () {
-                    return this.buildedOuter * 1300
+                    return 0
                 },
                 buildedOuterPrice2 () {
-                    return this.buildedOuter * 300
+                    return 0
                 },
                 firstBuildAreaPrice () {
-                    return this.dataForm.firstBuildArea * 1300
+                    return 0
                 },
                 earlyRemoval () {
-                    return 400000
+                    return 0
                 },
                 builded2500Price () {
                     return this.dataForm.buildTotal * 2500
@@ -346,10 +332,10 @@
                 },
 
                 placement50Adorn () {
-                    return this.placement * 300
+                    return 0
                 },
                 otherBuild1 () {
-                    return this.dataForm.otherBuildArea * 1300
+                    return 0
                 },
                 otherBuild2 () {
                     return 0
@@ -361,25 +347,22 @@
                     return this.dataForm.otherUnbuildArea * 900
                 },
                 otherBuild5 () {
-                    return this.dataForm.ladder * 700
+                    return 0
                 },
                 spaceAreaPrice () {
-                    return this.dataForm.spaceArea * 900
+                    return 0
                 },
                 transitionPrice () {
-                    return (
-                        this.placement * 40 * 36
-                        + this.buyArea * 30 * 36
-                    )
+                    return 0
                 },
                 storePrice () {
-                    return this.dataForm.storeNumber * 20000
+                    return 0
                 },
                 affiliatePrice () {
                     return 50000
                 },
                 removalPrice () {
-                    return this.placement * 10 * 3
+                    return 0
                 },
                 credentialsPrice () {
                     return this.dataForm.credentials * 5000
@@ -398,7 +381,11 @@
                     )
                 },
                 addTotal () {
-                    return this.secondTotal + this.thirdToal
+                    if (this.secondTotal > this.builded2500Price) {
+                        return this.secondTotal + this.thirdToal
+                    } else {
+                        return this.builded2500Price + this.thirdToal
+                    }
                 },
                 deductionTotal () {
                     return this.addTotal - this.firstTotal

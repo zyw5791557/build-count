@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>补偿款计算-套人</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #app {
+            width: 1000px;
+            margin: 0 auto;
+        }
+        #control-box {
+            padding: 10px;
+        }
+        .item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .item .name {
+            width: 300px;
+            text-align: right;
+            margin-right: 20px;
+        }
+        .box {
+            border-bottom: 1px solid #000;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="control-box">
+            <div class="item">
+                <span class="name">总建筑面积</span>
+                <input type="text" v-model.number="dataForm.buildTotal" @blur="stateHold('buildTotal')">
+            </div>
+            <div class="item">
+                <span class="name">安置人口</span>
+                <input type="text" v-model.number="dataForm.peopleNumber" @blur="stateHold('peopleNumber')">
+            </div>
+            <div class="item">
+                <span class="name">占地面积</span>
+                <input type="text" v-model.number="dataForm.firstBuildArea" @blur="stateHold('firstBuildArea')">
+            </div>
+            <div class="item">
+                <span class="name">其他结构(已建)</span>
+                <input type="text" v-model.number="dataForm.otherBuildArea" @blur="stateHold('otherBuildArea')">
+            </div>
+            <div class="item">
+                <span class="name">其他结构(未建)</span>
+                <input type="text" v-model.number="dataForm.otherUnbuildArea" @blur="stateHold('otherUnbuildArea')">
+            </div>
+            <div class="item">
+                <span class="name">其他结构(梯间)</span>
+                <input type="text" v-model.number="dataForm.ladder" @blur="stateHold('ladder')">
+            </div>
+            <div class="item">
+                <span class="name">围墙内的空地</span>
+                <input type="text" v-model.number="dataForm.spaceArea" @blur="stateHold('spaceArea')">
+            </div>
+            <div class="item">
+                <span class="name">店面(间)</span>
+                <input type="text" v-model.number="dataForm.storeNumber" @blur="stateHold('storeNumber')">
+            </div>
+            <div class="item">
+                <span class="name">合法权证(本)</span>
+                <input type="text" v-model.number="dataForm.credentials" @blur="stateHold('credentials')">
+            </div>
+            <div class="item">
+                <span class="name">是否抽取流水号</span>
+                <label>
+                    <i>是</i>
+                    <input type="radio" value="1" v-model="dataForm.serial">
+                </label>
+                <label>
+                    <i>否</i>
+                    <input type="radio" value="0" v-model="dataForm.serial">
+                </label>
+            </div>
+        </div>
+        <hr />
+        <div id="count-detail">
+            <div id="detail-first">
+                <div class="item">
+                    <span class="name">认定的安置面积</span>
+                    <span class="value">{{ placement }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">人均130M扣除应安置面积(已建)</span>
+                    <span class="value">{{ buildedInside }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">人均130M无合法批建手续未建面积</span>
+                    <span class="value">{{ unbuilded }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">人均130M以外已建面积</span>
+                    <span class="value">{{ buildedOuter }}</span>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div id="detail-second">
+            <div class="box">
+                <div class="item">
+                    <span class="name">人均50未建成应缴纳</span>
+                    <span class="value">{{ peopleAverageUnbuild.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">30平购房应缴纳</span>
+                    <span class="value">{{ buy30.toFixed(2) }}</span>
+                </div>
+                <div class="item total">
+                    <span class="name">小计</span>
+                    <span class="value">{{ firstTotal.toFixed(2) }}</span>
+                </div>
+            </div>
+            <div class="box">
+                <div class="item">
+                    <span class="name">认定产权已建成房屋面积装修</span>
+                    <span class="value">{{ builded50Adorn.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">人均130扣除应安置面积(已建)</span>
+                    <span class="value">{{ buildedInsidePrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">人均130无合法批建手续未建面积</span>
+                    <span class="value">{{ unbuildedPrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">按期搬迁奖励</span>
+                    <span class="value">{{ ontimeRemoval.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">合法认定面积按期签约奖励</span>
+                    <span class="value">{{ placementPrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">人均130扣除应安置面积(已建)房屋奖励</span>
+                    <span class="value">{{ buildedInsidePrice2.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">人均130以外的已建面积房屋签约奖励</span>
+                    <span class="value">{{ buildedOuterPrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">人均130以外已建面积(砖混)房屋按期签约奖励</span>
+                    <span class="value">{{ buildedOuterPrice2.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">无抢建奖励(奖励一层)</span>
+                    <span class="value">{{ firstBuildAreaPrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">提前搬迁奖励</span>
+                    <span class="value">{{ earlyRemoval.toFixed(2) }}</span>
+                </div>
+                <div class="item total">
+                    <span class="name">小计</span>
+                    <span class="value">{{ secondTotal.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">均价不足2500，按2500计</span>
+                    <span class="value">{{ builded2500Price.toFixed(2) }}</span>
+                </div>
+            </div>
+            <div class="box">
+                <div class="item">
+                    <span class="name">安置房未初装修补偿</span>
+                    <span class="value">{{placement50Adorn.toFixed(2)  }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">其他结构面积(第一层)</span>
+                    <span class="value">{{ otherBuild1.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">其他结构面积(第二层)</span>
+                    <span class="value">{{ otherBuild2.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">其他结构面积(第三层及以上)</span>
+                    <span class="value">{{ otherBuild3.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">其他结构面积(未建补助)</span>
+                    <span class="value">{{ otherBuild4.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">其他结构面积(梯间)</span>
+                    <span class="value">{{ otherBuild5.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">围墙内空地面积</span>
+                    <span class="value">{{ spaceAreaPrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">过渡费</span>
+                    <span class="value">{{ transitionPrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">店面补助费</span>
+                    <span class="value">{{ storePrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">附属物</span>
+                    <span class="value">{{ affiliatePrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">住宅搬迁补助费</span>
+                    <span class="value">{{ removalPrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">办理合法权证奖励</span>
+                    <span class="value">{{ credentialsPrice.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">抽流水号奖励</span>
+                    <span class="value">{{ serialNumber.toFixed(2) }}</span>
+                </div>
+                <div class="item">
+                    <span class="name">小计</span>
+                    <span class="value">{{ thirdToal.toFixed(2) }}</span>
+                </div>
+            </div>            
+            <div class="item">
+                <span class="name">2 + 3合计</span>
+                <span class="value">{{ addTotal.toFixed(2) }}</span>
+            </div>            
+            <div class="item">
+                <span class="name">对抵合计</span>
+                <span class="value">{{ deductionTotal.toFixed(2) }}</span>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+    <script>
+        const vm = new Vue({
+            el: '#app',
+            data: {
+                dataForm: {
+                    buildTotal: 0,
+                    peopleNumber: 0,
+                    firstBuildArea: 0,
+                    otherBuildArea: 0,
+                    otherUnbuildArea: 0,
+                    ladder: 0,
+                    spaceArea: 0,
+                    storeNumber: 0,
+                    credentials: 0,
+                    serial: 0
+                }
+            },
+            computed: {
+                buildPeopleTotal () {
+                    return this.dataForm.peopleNumber * 130
+                },
+                placement () {
+                    return this.dataForm.peopleNumber * 50
+                },
+                buyArea () {
+                    return this.dataForm.peopleNumber * 30
+                },
+                buildedPeople50 () {
+                    return (this.dataForm.buildTotal - this.dataForm.peopleNumber * 50) >= 0
+                    ? this.placement
+                    : this.placement - this.dataForm.buildTotal
+                },
+                buildedInside () {
+                    return ((this.dataForm.buildTotal - this.buildPeopleTotal) >= 0) 
+                    ? (this.dataForm.peopleNumber * 80)
+                    : (
+                        (this.dataForm.buildTotal - this.placement) >= 0
+                        ? (this.dataForm.buildTotal - this.placement)
+                        : 0
+                    )
+                },
+                unbuilded () {
+                    return ((this.dataForm.buildTotal - this.buildPeopleTotal) < 0) 
+                    ? (this.buildPeopleTotal - this.dataForm.buildTotal)
+                    : 0
+                },
+                buildedOuter () {
+                    return ((this.dataForm.buildTotal - this.buildPeopleTotal) >= 0) 
+                    ? (this.dataForm.buildTotal - this.buildPeopleTotal)
+                    : 0
+                },
+
+                peopleAverageUnbuild () {
+                    return (this.dataForm.buildTotal - this.placement) >= 0
+                    ? 0
+                    : (this.placement - this.dataForm.buildTotal) * 950
+                },
+                buy30 () {
+                    return this.buyArea * 8800
+                },
+                firstTotal () {
+                    return this.peopleAverageUnbuild + this.buy30
+                },
+
+                builded50Adorn () {
+                    return this.buildedPeople50 * 280
+                },
+                buildedInsidePrice () {
+                    return this.buildedInside * 560
+                },
+                unbuildedPrice () {
+                    return this.unbuilded * 340
+                },
+                ontimeRemoval () {
+                    return this.placement * 250
+                },
+                placementPrice () {
+                    return this.placement * 1500
+                },
+                buildedInsidePrice2 () {
+                    return this.buildedInside * 1600
+                },
+                buildedOuterPrice () {
+                    return this.buildedOuter * 1300
+                },
+                buildedOuterPrice2 () {
+                    return this.buildedOuter * 300
+                },
+                firstBuildAreaPrice () {
+                    return this.dataForm.firstBuildArea * 1300
+                },
+                earlyRemoval () {
+                    return 400000
+                },
+                builded2500Price () {
+                    return this.dataForm.buildTotal * 2500
+                },
+                secondTotal () {
+                    return (
+                        this.builded50Adorn + this.buildedInsidePrice + this.unbuildedPrice 
+                        +  this.ontimeRemoval + this.placementPrice + this.buildedInsidePrice2 
+                        + this.buildedOuterPrice + this.buildedOuterPrice2 + this.firstBuildAreaPrice 
+                        + this.earlyRemoval
+                    )
+                },
+
+                placement50Adorn () {
+                    return this.placement * 300
+                },
+                otherBuild1 () {
+                    return this.dataForm.otherBuildArea * 1300
+                },
+                otherBuild2 () {
+                    return 0
+                },
+                otherBuild3 () {
+                    return 0
+                },
+                otherBuild4 () {
+                    return this.dataForm.otherUnbuildArea * 900
+                },
+                otherBuild5 () {
+                    return this.dataForm.ladder * 700
+                },
+                spaceAreaPrice () {
+                    return this.dataForm.spaceArea * 900
+                },
+                transitionPrice () {
+                    return (
+                        this.placement * 40 * 36
+                        + this.buyArea * 30 * 36
+                    )
+                },
+                storePrice () {
+                    return this.dataForm.storeNumber * 20000
+                },
+                affiliatePrice () {
+                    return 50000
+                },
+                removalPrice () {
+                    return this.placement * 10 * 3
+                },
+                credentialsPrice () {
+                    return this.dataForm.credentials * 5000
+                },
+                serialNumber () {
+                    
+                    return Number(this.dataForm.serial) ? 6000 : 0
+                },
+                thirdToal () {
+                    return (
+                        this.placement50Adorn + this.otherBuild1 + this.otherBuild2
+                        + this.otherBuild3 + this.otherBuild4 + this.otherBuild5
+                        + this.spaceAreaPrice + this.transitionPrice + this.storePrice
+                        + this.affiliatePrice + this.removalPrice + this.credentialsPrice
+                        + this.serialNumber
+                    )
+                },
+                addTotal () {
+                    if (this.secondTotal > this.builded2500Price) {
+                        return this.secondTotal + this.thirdToal
+                    } else {
+                        return this.builded2500Price + this.thirdToal
+                    }
+                },
+                deductionTotal () {
+                    return this.addTotal - this.firstTotal
+                }
+            },
+            created () {
+                this.paramsInit()
+            },
+            methods: {
+                paramsInit () {
+                    for (key in this.dataForm) {
+                        let temp = localStorage.getItem(key)
+                        if (temp) {
+                            this.dataForm[key] = temp
+                        }
+                    }
+                },
+                stateHold (key) {
+                    localStorage.setItem(key, this.dataForm[key])
+                }
+            }
+        })
+    </script>
+</body>
+</html>
